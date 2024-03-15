@@ -7,15 +7,11 @@ output:
 
 <p align = "justify">
 
-<font size="5"> Data analysis for: </font>
+<font size="5"> Data analysis workflow: </font>
 
-<font size="4"> Graham ZA and Padilla Perez DJ, (2023). Correlated evolution between body color and burrowing behavior in crayfish.</font>
-</p>
-
-</p></p>
-
-[Dylan J. Padilla Perez](https://dylanpadilla.netlify.app/), School of Life Sciences, Arizona State University, Tempe, AZ 85287, USA.
-</p></p>
+</br>
+[Dylan Padilla](https://dylanpadilla.netlify.app/), School of Life Sciences, Arizona State University, Tempe, AZ 85287, USA.
+</br>
 
 <b>
 <font size="4"> Library </font>
@@ -31,15 +27,16 @@ knitr::opts_chunk$set(comment = ">", fig.width = 7, fig.height = 7, dpi = 300, w
 
 ```{r}
 
-library(phytools)
 library(ape)
 library(caper)
+library(EloChoice)
 library(geiger)
-library(ggtree)
-library(ggtreeExtra)
-library(ggplot2)
+library(irr)
+library(phytools)
 library(plotrix)
 library(png)
+library(reshape)
+library(reshape2)
 library(xtable)
 
 ```
@@ -54,50 +51,77 @@ sessionInfo()
 </br></br></br>
 
 
-<font size="4"> **Evolution of coloration in crayfish** </font>
+<font size="4"> **Correlated evolution of conspicuous coloration and burrowing in crayfish** </font>
 
-</br>
+</br></br>
+
 
 ```{r}
 
 ## Loading data
 
 craydata <- read.csv("col_data.csv", row.names = 1)
-head(craydata)
+#head(craydata)
+
+craydata_updated <- read.csv("col_data_updated.csv", row.names = 1)
+head(craydata_updated)
+length(unique(craydata_updated$body_color_zg))
+length(unique(craydata_updated$body_color_Observer10))
+
 
 craytree <- read.tree("stern.2017.ml.new.tree")
 craytree
 
-## Changing levels of the factors "body_color" and "combined_burrow_category" for modeling discrete traits
 
-craydata$body_color[craydata$body_color == "no"] <- "cryptic"
-craydata$body_color[craydata$body_color == "blue"] <- "conspicuous"
-craydata$body_color[craydata$body_color == "orange"] <- "conspicuous"
-craydata$body_color[craydata$body_color == "purple"] <- "conspicuous"
-craydata$body_color[craydata$body_color == "red"] <- "conspicuous"
-craydata$body_color[craydata$body_color == "blue_red"] <- "conspicuous"
-craydata$body_color[craydata$body_color == "orange_red"] <- "conspicuous"
-craydata$body_color[craydata$body_color == "blue_orange_red"] <- "conspicuous"
-craydata$body_color[craydata$body_color == "blue_purple"] <- "conspicuous"
-craydata$body_color[craydata$body_color == "unpigmented"] <- "cryptic"
+## Creating a table for reliability analysis
 
-craydata$species <- rownames(craydata)
-names(craydata)
+names(craydata_updated)
+head(craydata_updated)
 
-craydata <- craydata[ , c(19, 1:18)]
+rel.dat <- cbind(rownames(craydata_updated), craydata_updated$combined_burrow_category, craydata_updated[8:17])
+colnames(rel.dat)[c(1, 2)] <- c("species", "combined_burrow_category")
+head(rel.dat)
 
-unique(craydata$body_color)
+mat <- matrix(NA, nrow = nrow(rel.dat), ncol = 10, byrow = FALSE)
+for(j in 1:10){
+    for(i in 1:nrow(rel.dat)){
+    dat <- rel.dat[3:ncol(rel.dat)]
+    obs <- dat[i, j]
+    if(obs == "cryptic" | obs == "unpigmented"){
+        mat[i, j] <- "cryptic"
+    }
+    else{
+        mat[i, j] <- "conspicuous"
+    }
+    
+    }
+}
 
-craydata$body_color <- as.factor(craydata$body_color)
-levels(craydata$body_color)
+colnames(mat) <- names(dat)
+head(mat)
 
-unique(craydata$combined_burrow_category)
+## Computing Fleiss Kappa
 
-craydata$combined_burrow_category[craydata$combined_burrow_category == "terrestrial_burrower"] <- "semi-terrestrial"
-craydata$combined_burrow_category[craydata$combined_burrow_category == "aquatic_burrower"] <- "aquatic"
+kappam.fleiss(mat, detail = TRUE)
 
-craydata$combined_burrow_category <- as.factor(craydata$combined_burrow_category)
-levels(craydata$combined_burrow_category)
+rel.tab <- cbind(rel.dat[1:2], mat)
+names(rel.tab)
+rownames(rel.tab) <- rel.tab$species
+dim(rel.tab)
+
+
+mlt <- melt(rel.tab, id.vars = c("species", "combined_burrow_category"), measure.vars = names(rel.tab[3:12]), direction = "long", value.name = "color", variable.name = "raterID")
+mlt <- mlt[1:nrow(rel.tab), ]
+rownames(mlt) <- mlt$species
+head(mlt)
+tail(mlt)
+
+mlt$combined_burrow_category[mlt$combined_burrow_category == "terrestrial_burrower"] <- "semi-terrestrial"
+mlt$combined_burrow_category[mlt$combined_burrow_category == "aquatic_burrower"] <- "aquatic"
+
+mlt$combined_burrow_category <- as.factor(mlt$combined_burrow_category)
+levels(mlt$combined_burrow_category)
+
 
 
 ## Pruning the data and tree
@@ -110,6 +134,21 @@ pruned.data <- craydata[!(rownames(craydata) %in% chk$data_not_tree),, drop = FA
 name.check(pruned.tree, pruned.data)
 
 bodycol <- setNames(as.factor(pruned.data$body_color), rownames(pruned.data))
+head(bodycol)
+burrowing <- setNames(as.factor(pruned.data$combined_burrow_category), rownames(pruned.data))
+head(burrowing)
+
+
+## Pruning the data and tree (updated)
+
+chk <- name.check(craytree, mlt)
+summary(chk)
+
+pruned.tree <- drop.tip(craytree, chk$tree_not_data)
+pruned.data <- mlt[!(rownames(mlt) %in% chk$data_not_tree),, drop = FALSE]
+name.check(pruned.tree, pruned.data)
+
+bodycol <- setNames(as.factor(pruned.data$color), rownames(pruned.data))
 head(bodycol)
 burrowing <- setNames(as.factor(pruned.data$combined_burrow_category), rownames(pruned.data))
 head(burrowing)
@@ -132,15 +171,15 @@ anova(dependent.burrowing, dependent.bodycol, interdependent.model)
 
 ## Plotting model
 
-plot(dependent.bodycol, fit.signif = 4, cex.main = 1,
+plot(interdependent.model, fit.signif = 4, cex.main = 1,
      cex.sub = 0.8, cex.traits = 0.7, color = TRUE,
-     cex.rates = 0.7, lwd = 1, lwd.by.rate = TRUE, max.lwd = 4)
+     cex.rates = 0.7, lwd = 1, lwd.by.rate = TRUE)
 
 
 ```
 
 
-```{r, include = FALSE}
+```{r, include = FALSE, eval = FALSE}
 
 ## Plotting model
 
@@ -171,8 +210,6 @@ dev.off()
 
 ## Trees facing to each other
 
-quartz()
-
 layout(matrix(c(1, 1, 2, 2,
                 1, 1, 3, 3,
                 1, 1, 3, 3,
@@ -180,15 +217,18 @@ layout(matrix(c(1, 1, 2, 2,
                 1, 1, 2, 2), nrow = 5, ncol = 4, byrow = TRUE))
 
 
-c <- pruned.data$species[pruned.data$body_color == "c"]
-cons <- pruned.data$species[pruned.data$body_color == "c*"]
+
+c <- pruned.data$species[pruned.data$color == "cryptic"]
+cons <- pruned.data$species[pruned.data$color == "conspicuous"]
+
+
 
 ## paint the edges
 
 tt <- paintBranches(pruned.tree, edge = sapply(cons, match, pruned.tree$tip.label),
-    state = "c*", anc.state = "c")
+    state = "conspicuous", anc.state = "cryptic")
 
-cols1 <- setNames(c("black", "orange"), c("c", "c*"))
+cols1 <- setNames(c("black", "orange"), c("cryptic", "conspicuous"))
 
 ## Body color tree
 
@@ -211,17 +251,17 @@ rasterImage(conspicuous, 60, 213, 168, 295)
 
 ## Burrowing tree
 
-a <- pruned.data$species[pruned.data$combined_burrow_category == "a"]
-t <- pruned.data$species[pruned.data$combined_burrow_category == "t"]
+a <- pruned.data$species[pruned.data$combined_burrow_category == "aquatic"]
+t <- pruned.data$species[pruned.data$combined_burrow_category == "semi-terrestrial"]
 
 ## paint the edges
 
 bt <- paintBranches(pruned.tree, edge = sapply(a, match, pruned.tree$tip.label),
-    state = "a", anc.state = "t")
+    state = "aquatic", anc.state = "semi-terrestrial")
 
 bt
 
-cols2 <- setNames(c("#2F5597", "#956D45"), c("a", "t"))
+cols2 <- setNames(c("#2F5597", "#956D45"), c("aquatic", "semi-terrestrial"))
 
 ## Burrowing tree
 
@@ -244,7 +284,7 @@ rasterImage(burrow, 70, 220, 260, 380)
 ```
 
 
-```{r, include = FALSE}
+```{r, include = FALSE, eval = FALSE}
 
 
 ## Trees facing to each other
@@ -258,15 +298,15 @@ layout(matrix(c(1, 1, 2, 2,
                 1, 1, 2, 2), nrow = 5, ncol = 4, byrow = TRUE))
 
 
-c <- pruned.data$species[pruned.data$body_color == "c"]
-cons <- pruned.data$species[pruned.data$body_color == "c*"]
+c <- pruned.data$species[pruned.data$color == "cryptic"]
+cons <- pruned.data$species[pruned.data$color == "conspicuous"]
 
 ## paint the edges
 
 tt <- paintBranches(pruned.tree, edge = sapply(cons, match, pruned.tree$tip.label),
-    state = "c*", anc.state = "c")
+    state = "conspicuous", anc.state = "cryptic")
 
-cols1 <- setNames(c("black", "orange"), c("c", "c*"))
+cols1 <- setNames(c("black", "orange"), c("cryptic", "conspicuous"))
 
 ## Body color tree
 
@@ -289,17 +329,17 @@ rasterImage(conspicuous, 60, 213, 168, 295)
 
 ## Burrowing tree
 
-a <- pruned.data$species[pruned.data$combined_burrow_category == "a"]
-t <- pruned.data$species[pruned.data$combined_burrow_category == "t"]
+a <- pruned.data$species[pruned.data$combined_burrow_category == "aquatic"]
+t <- pruned.data$species[pruned.data$combined_burrow_category == "semi-terrestrial"]
 
 ## paint the edges
 
 bt <- paintBranches(pruned.tree, edge = sapply(a, match, pruned.tree$tip.label),
-    state = "a", anc.state = "t")
+    state = "aquatic", anc.state = "semi-terrestrial")
 
 bt
 
-cols2 <- setNames(c("#2F5597", "#956D45"), c("a", "t"))
+cols2 <- setNames(c("#2F5597", "#956D45"), c("aquatic", "semi-terrestrial"))
 
 ## Burrowing tree
 
@@ -333,15 +373,15 @@ layout(matrix(c(1, 1, 2, 2,
                 1, 1, 2, 2), nrow = 5, ncol = 4, byrow = TRUE))
 
 
-c <- pruned.data$species[pruned.data$body_color == "c"]
-cons <- pruned.data$species[pruned.data$body_color == "c*"]
+c <- pruned.data$species[pruned.data$color == "cryptic"]
+cons <- pruned.data$species[pruned.data$color == "conspicuous"]
 
 ## paint the edges
 
 tt <- paintBranches(pruned.tree, edge = sapply(cons, match, pruned.tree$tip.label),
-    state = "c*", anc.state = "c")
+    state = "conspicuous", anc.state = "cryptic")
 
-cols1 <- setNames(c("black", "orange"), c("c", "c*"))
+cols1 <- setNames(c("black", "orange"), c("cryptic", "conspicuous"))
 
 ## Body color tree
 
@@ -364,17 +404,17 @@ rasterImage(conspicuous, 60, 213, 168, 295)
 
 ## Burrowing tree
 
-a <- pruned.data$species[pruned.data$combined_burrow_category == "a"]
-t <- pruned.data$species[pruned.data$combined_burrow_category == "t"]
+a <- pruned.data$species[pruned.data$combined_burrow_category == "aquatic"]
+t <- pruned.data$species[pruned.data$combined_burrow_category == "semi-terrestrial"]
 
 ## paint the edges
 
 bt <- paintBranches(pruned.tree, edge = sapply(a, match, pruned.tree$tip.label),
-    state = "a", anc.state = "t")
+    state = "aquatic", anc.state = "semi-terrestrial")
 
 bt
 
-cols2 <- setNames(c("#2F5597", "#956D45"), c("a", "t"))
+cols2 <- setNames(c("#2F5597", "#956D45"), c("aquatic", "semi-terrestrial"))
 
 ## Burrowing tree
 
@@ -405,8 +445,6 @@ dev.off()
 
 ```{r}
 
-
-quartz()
 
 layout(matrix(c(1, 1, 1, 2, 2, 2,
                 3, 3, 1, 2, 4, 4,
@@ -448,68 +486,73 @@ legend("topright", legend = c("aquatic burrowing", "semi-terrestrial burrowing")
 
 ## Adding pie charts
 
-craydata <- read.csv("col_data.csv", row.names = 1)
+craydata_updated <- read.csv("col_data_updated.csv", row.names = 1)
+unique(craydata_updated$body_color_zg)
 
 craytree <- read.tree("stern.2017.ml.new.tree")
-craytree
+
 
 ## Changing levels of the factors "body_color"
 
-craydata$body_color[craydata$body_color == "no"] <- "c"
-craydata$body_color[craydata$body_color == "blue"] <- "b"
-craydata$body_color[craydata$body_color == "orange"] <- "o"
-craydata$body_color[craydata$body_color == "purple"] <- "p"
-craydata$body_color[craydata$body_color == "red"] <- "r"
-craydata$body_color[craydata$body_color == "blue_red"] <- "g"
-craydata$body_color[craydata$body_color == "orange_red"] <- "g"
-craydata$body_color[craydata$body_color == "blue_orange_red"] <- "g"
-craydata$body_color[craydata$body_color == "blue_purple"] <- "g"
-craydata$body_color[craydata$body_color == "unpigmented"] <- "c"
+craydata_updated$body_color_zg[craydata_updated$body_color_zg == "no"] <- "c"
+craydata_updated$body_color_zg[craydata_updated$body_color_zg == "blue"] <- "b"
+craydata_updated$body_color_zg[craydata_updated$body_color_zg == "orange"] <- "o"
+craydata_updated$body_color_zg[craydata_updated$body_color_zg == "purple"] <- "p"
+craydata_updated$body_color_zg[craydata_updated$body_color_zg == "red"] <- "r"
+craydata_updated$body_color_zg[craydata_updated$body_color_zg == "blue_red"] <- "g"
+craydata_updated$body_color_zg[craydata_updated$body_color_zg == "red_blue"] <- "g"
+craydata_updated$body_color_zg[craydata_updated$body_color_zg == "cryptic_blue"] <- "g"
+craydata_updated$body_color_zg[craydata_updated$body_color_zg == "cryptic_blue "] <- "g"
+craydata_updated$body_color_zg[craydata_updated$body_color_zg == "cryptic_blue_orange_red"] <- "g"
+craydata_updated$body_color_zg[craydata_updated$body_color_zg == "cryptic_orange"] <- "g"
+craydata_updated$body_color_zg[craydata_updated$body_color_zg == "orange_blue"] <- "g"
+craydata_updated$body_color_zg[craydata_updated$body_color_zg == "orange_red"] <- "g"
+craydata_updated$body_color_zg[craydata_updated$body_color_zg == "orange_cryptic"] <- "g"
+craydata_updated$body_color_zg[craydata_updated$body_color_zg == "cryptic"] <- "c"
+craydata_updated$body_color_zg[craydata_updated$body_color_zg == "blue_orange_red"] <- "g"
+craydata_updated$body_color_zg[craydata_updated$body_color_zg == "blue_purple"] <- "g"
+craydata_updated$body_color_zg[craydata_updated$body_color_zg == "unpigmented"] <- "c"
 
 
-craydata$species <- rownames(craydata)
+unique(craydata_updated$body_color_zg)
 
-craydata <- craydata[ , c(19, 1:18)]
+craydata_updated$body_color_zg <- as.factor(craydata_updated$body_color_zg)
+levels(craydata_updated$body_color_zg)
 
-unique(craydata$body_color)
+craydata_updated$combined_burrow_category[craydata_updated$combined_burrow_category == "terrestrial_burrower"] <- "t"
+craydata_updated$combined_burrow_category[craydata_updated$combined_burrow_category == "aquatic_burrower"] <- "a"
 
-craydata$body_color <- as.factor(craydata$body_color)
-levels(craydata$body_color)
-
-craydata$combined_burrow_category[craydata$combined_burrow_category == "terrestrial_burrower"] <- "t"
-craydata$combined_burrow_category[craydata$combined_burrow_category == "aquatic_burrower"] <- "a"
-
-craydata$combined_burrow_category <- as.factor(craydata$combined_burrow_category)
-levels(craydata$combined_burrow_category)
+craydata_updated$combined_burrow_category <- as.factor(craydata_updated$combined_burrow_category)
+levels(craydata_updated$combined_burrow_category)
 
 ## Pruning the data and tree
 
-chk <- name.check(craytree, craydata)
+chk <- name.check(craytree, craydata_updated)
 summary(chk)
 
 pruned.tree <- drop.tip(craytree, chk$tree_not_data)
-pruned.data <- craydata[!(rownames(craydata) %in% chk$data_not_tree),, drop = FALSE]
+pruned.data <- craydata_updated[!(rownames(craydata_updated) %in% chk$data_not_tree),, drop = FALSE]
 name.check(pruned.tree, pruned.data)
 
-colsf <- setNames(c("skyblue", "#956D45", "green4", "orange", "#6600CC", "red"), c("b", "c", "g", "o", "p", "r"))
+colsf <- setNames(c("skyblue", "black", "green4", "orange", "#6600CC", "red"), c("b", "c", "g", "o", "p", "r"))
 
 par(mar = c(5, 2, 2, 0))
-pie(table(pruned.data$body_color), border = FALSE, col = colsf, labels = "", radius = 0.5)
-text(0, 0.8, paste("Combined \n n = ", length(pruned.data$body_color), sep = ""), font = 2)
-legend("left", paste(round((table(pruned.data$body_color)/length(pruned.data$body_color)*100), 1), rep("%", length(unique(pruned.data$body_color)), sep = "")), fill = colsf, bty = "n", cex = 0.8, border = FALSE)
+pie(table(pruned.data$body_color_zg), border = FALSE, col = colsf, labels = "", radius = 0.5)
+text(0, 0.8, paste("Combined \n n = ", length(pruned.data$body_color_zg), sep = ""), font = 2)
+legend("left", paste(round((table(pruned.data$body_color_zg)/length(pruned.data$body_color_zg)*100), 1), rep("%", length(unique(pruned.data$body_color_zg)), sep = "")), fill = colsf, bty = "n", cex = 0.8, border = FALSE)
 
 par(mar = c(4, 2, 1.3, 0))
-pie(table(pruned.data$body_color[pruned.data$combined_burrow_category == "a"]), border = FALSE, labels = "", main = paste("Aquatic burrowing \n n = ", length(pruned.data$body_color[pruned.data$combined_burrow_category == "a"]), sep = ""), col = colsf, radius = 0.98, cex.main = 0.8)
-legend("left", paste(round((table(pruned.data$body_color[pruned.data$combined_burrow_category == "a"])/length(pruned.data$body_color[pruned.data$combined_burrow_category == "a"]))*100, 1), rep("%", length(unique(pruned.data$body_color))), sep = ""), fill = colsf, bty = "n", cex = 0.8, border = FALSE)
+pie(table(pruned.data$body_color_zg[pruned.data$combined_burrow_category == "a"]), border = FALSE, labels = "", main = paste("Aquatic burrowing \n n = ", length(pruned.data$body_color_zg[pruned.data$combined_burrow_category == "a"]), sep = ""), col = colsf, radius = 0.98, cex.main = 0.8)
+legend("left", paste(round((table(pruned.data$body_color_zg[pruned.data$combined_burrow_category == "a"])/length(pruned.data$body_color_zg[pruned.data$combined_burrow_category == "a"]))*100, 1), rep("%", length(unique(pruned.data$body_color_zg))), sep = ""), fill = colsf, bty = "n", cex = 0.8, border = FALSE)
 
-pie(table(pruned.data$body_color[pruned.data$combined_burrow_category == "t"]), border = FALSE, main = paste("Semi-terrestrial burrowing \n n = ", length(pruned.data$body_color[pruned.data$combined_burrow_category == "t"]), sep = ""),  col = colsf, labels = "", radius = 0.98, cex.main = 0.8)
-legend("left", paste(round((table(pruned.data$body_color[pruned.data$combined_burrow_category == "t"])/length(pruned.data$body_color[pruned.data$combined_burrow_category == "t"]))*100, 1), rep("%", length(unique(pruned.data$body_color))), sep = ""), fill = colsf, bty = "n", cex = 0.8, border = FALSE)
+pie(table(pruned.data$body_color_zg[pruned.data$combined_burrow_category == "t"]), border = FALSE, main = paste("Semi-terrestrial burrowing \n n = ", length(pruned.data$body_color_zg[pruned.data$combined_burrow_category == "t"]), sep = ""),  col = colsf, labels = "", radius = 0.98, cex.main = 0.8)
+legend("left", paste(round((table(pruned.data$body_color_zg[pruned.data$combined_burrow_category == "t"])/length(pruned.data$body_color_zg[pruned.data$combined_burrow_category == "t"]))*100, 1), rep("%", length(unique(pruned.data$body_color_zg))), sep = ""), fill = colsf, bty = "n", cex = 0.8, border = FALSE)
 
 
 ```
 
 
-```{r, include = FALSE}
+```{r, include = FALSE, eval = FALSE}
 
 
 png("figure2.1.png", height = 7, width = 7, units = "in", res = 300)
@@ -552,19 +595,19 @@ legend("topright", legend = c("aquatic burrowing", "semi-terrestrial burrowing")
     pt.cex = 1.5, bty = "n", col = "transparent", cex = 1.5)
 
 
-colsf <- setNames(c("skyblue", "#956D45", "green4", "orange", "#6600CC", "red"), c("b", "c", "g", "o", "p", "r"))
+colsf <- setNames(c("#2F5597", "#956D45"), c("b", "c"))
 
 par(mar = c(5, 2, 2, 0))
-pie(table(pruned.data$body_color), border = FALSE, col = colsf, labels = "", radius = 0.5)
-text(0, 0.8, paste("Combined \n n = ", length(pruned.data$body_color), sep = ""), font = 2)
-legend("left", paste(round((table(pruned.data$body_color)/length(pruned.data$body_color)*100), 1), rep("%", length(unique(pruned.data$body_color)), sep = "")), fill = colsf, bty = "n", cex = 0.8, border = FALSE)
+pie(table(pruned.data$color), border = FALSE, col = colsf, labels = "", radius = 0.5)
+text(0, 0.8, paste("Combined \n n = ", length(pruned.data$color), sep = ""), font = 2)
+legend("left", paste(round((table(pruned.data$color)/length(pruned.data$color)*100), 1), rep("%", length(unique(pruned.data$color)), sep = "")), fill = colsf, bty = "n", cex = 0.8, border = FALSE)
 
 par(mar = c(4, 2, 1.3, 0))
-pie(table(pruned.data$body_color[pruned.data$combined_burrow_category == "a"]), border = FALSE, labels = "", main = paste("Aquatic burrowing \n n = ", length(pruned.data$body_color[pruned.data$combined_burrow_category == "a"]), sep = ""), col = colsf, radius = 0.98, cex.main = 0.8)
-legend("left", paste(round((table(pruned.data$body_color[pruned.data$combined_burrow_category == "a"])/length(pruned.data$body_color[pruned.data$combined_burrow_category == "a"]))*100, 1), rep("%", length(unique(pruned.data$body_color))), sep = ""), fill = colsf, bty = "n", cex = 0.8, border = FALSE)
+pie(table(pruned.data$color[pruned.data$combined_burrow_category == "a"]), border = FALSE, labels = "", main = paste("Aquatic burrowing \n n = ", length(pruned.data$color[pruned.data$combined_burrow_category == "a"]), sep = ""), col = colsf, radius = 0.98, cex.main = 0.8)
+legend("left", paste(round((table(pruned.data$color[pruned.data$combined_burrow_category == "a"])/length(pruned.data$color[pruned.data$combined_burrow_category == "a"]))*100, 1), rep("%", length(unique(pruned.data$color))), sep = ""), fill = colsf, bty = "n", cex = 0.8, border = FALSE)
 
-pie(table(pruned.data$body_color[pruned.data$combined_burrow_category == "t"]), border = FALSE, main = paste("Semi-terrestrial burrowing \n n = ", length(pruned.data$body_color[pruned.data$combined_burrow_category == "t"]), sep = ""),  col = colsf, labels = "", radius = 0.98, cex.main = 0.8)
-legend("left", paste(round((table(pruned.data$body_color[pruned.data$combined_burrow_category == "t"])/length(pruned.data$body_color[pruned.data$combined_burrow_category == "t"]))*100, 1), rep("%", length(unique(pruned.data$body_color))), sep = ""), fill = colsf, bty = "n", cex = 0.8, border = FALSE)
+pie(table(pruned.data$color[pruned.data$combined_burrow_category == "t"]), border = FALSE, main = paste("Semi-terrestrial burrowing \n n = ", length(pruned.data$color[pruned.data$combined_burrow_category == "t"]), sep = ""),  col = colsf, labels = "", radius = 0.98, cex.main = 0.8)
+legend("left", paste(round((table(pruned.data$color[pruned.data$combined_burrow_category == "t"])/length(pruned.data$color[pruned.data$combined_burrow_category == "t"]))*100, 1), rep("%", length(unique(pruned.data$color))), sep = ""), fill = colsf, bty = "n", cex = 0.8, border = FALSE)
 
 
 dev.off()
@@ -609,17 +652,19 @@ legend("topright", legend = c("aquatic burrowing", "semi-terrestrial burrowing")
     pt.cex = 1.5, bty = "n", col = "transparent", cex = 1.5)
 
 
+colsf <- setNames(c("#2F5597", "#956D45"), c("b", "c"))
+
 par(mar = c(5, 2, 2, 0))
-pie(table(pruned.data$body_color), border = FALSE, col = colsf, labels = "", radius = 0.58)
-text(0, 0.8, paste("Combined \n n = ", length(pruned.data$body_color), sep = ""), font = 2)
-legend("left", paste(round((table(pruned.data$body_color)/length(pruned.data$body_color)*100), 1), rep("%", length(unique(pruned.data$body_color)), sep = "")), fill = colsf, bty = "n", cex = 0.8, border = FALSE)
+pie(table(pruned.data$color), border = FALSE, col = colsf, labels = "", radius = 0.5)
+text(0, 0.8, paste("Combined \n n = ", length(pruned.data$color), sep = ""), font = 2)
+legend("left", paste(round((table(pruned.data$color)/length(pruned.data$color)*100), 1), rep("%", length(unique(pruned.data$color)), sep = "")), fill = colsf, bty = "n", cex = 0.8, border = FALSE)
 
 par(mar = c(4, 2, 1.3, 0))
-pie(table(pruned.data$body_color[pruned.data$combined_burrow_category == "a"]), border = FALSE, labels = "", main = paste("Aquatic burrowing \n n = ", length(pruned.data$body_color[pruned.data$combined_burrow_category == "a"]), sep = ""), col = colsf, radius = 0.98, cex.main = 0.8)
-legend("left", paste(round((table(pruned.data$body_color[pruned.data$combined_burrow_category == "a"])/length(pruned.data$body_color[pruned.data$combined_burrow_category == "a"]))*100, 1), rep("%", length(unique(pruned.data$body_color))), sep = ""), fill = colsf, bty = "n", cex = 0.8, border = FALSE)
+pie(table(pruned.data$color[pruned.data$combined_burrow_category == "a"]), border = FALSE, labels = "", main = paste("Aquatic burrowing \n n = ", length(pruned.data$color[pruned.data$combined_burrow_category == "a"]), sep = ""), col = colsf, radius = 0.98, cex.main = 0.8)
+legend("left", paste(round((table(pruned.data$color[pruned.data$combined_burrow_category == "a"])/length(pruned.data$color[pruned.data$combined_burrow_category == "a"]))*100, 1), rep("%", length(unique(pruned.data$color))), sep = ""), fill = colsf, bty = "n", cex = 0.8, border = FALSE)
 
-pie(table(pruned.data$body_color[pruned.data$combined_burrow_category == "t"]), border = FALSE, main = paste("Semi-terrestrial burrowing \n n = ", length(pruned.data$body_color[pruned.data$combined_burrow_category == "t"]), sep = ""),  col = colsf, labels = "", radius = 0.98, cex.main = 0.8)
-legend("left", paste(round((table(pruned.data$body_color[pruned.data$combined_burrow_category == "t"])/length(pruned.data$body_color[pruned.data$combined_burrow_category == "t"]))*100, 1), rep("%", length(unique(pruned.data$body_color))), sep = ""), fill = colsf, bty = "n", cex = 0.8, border = FALSE)
+pie(table(pruned.data$color[pruned.data$combined_burrow_category == "t"]), border = FALSE, main = paste("Semi-terrestrial burrowing \n n = ", length(pruned.data$color[pruned.data$combined_burrow_category == "t"]), sep = ""),  col = colsf, labels = "", radius = 0.98, cex.main = 0.8)
+legend("left", paste(round((table(pruned.data$color[pruned.data$combined_burrow_category == "t"])/length(pruned.data$color[pruned.data$combined_burrow_category == "t"]))*100, 1), rep("%", length(unique(pruned.data$color))), sep = ""), fill = colsf, bty = "n", cex = 0.8, border = FALSE)
 
 
 dev.off()
@@ -632,33 +677,23 @@ dev.off()
 ```{r}
 
 
-craydata <- read.csv("col_data.csv", row.names = 1)
+craydata.fam <- read.csv("col_data.csv", row.names = 1)
+craydata.fam$species <- rownames(craydata.fam)
+
+mlt <- melt(rel.tab, id.vars = c("species", "combined_burrow_category"), measure.vars = names(rel.tab[3:12]), direction = "long", value.name = "color", variable.name = "raterID")
+mlt <- mlt[1:nrow(rel.tab), ]
+rownames(mlt) <- mlt$species
+
+craydata <- merge(mlt, craydata.fam[c(1, 7, 19)], by = "species")
+rownames(craydata) <- craydata$species
+
 
 craytree <- read.tree("stern.2017.ml.new.tree")
-craytree
 
-## Changing levels of the factors "body_color"
+unique(craydata$color)
 
-craydata$body_color[craydata$body_color == "no"] <- "c"
-craydata$body_color[craydata$body_color == "blue"] <- "b"
-craydata$body_color[craydata$body_color == "orange"] <- "o"
-craydata$body_color[craydata$body_color == "purple"] <- "p"
-craydata$body_color[craydata$body_color == "red"] <- "r"
-craydata$body_color[craydata$body_color == "blue_red"] <- "g"
-craydata$body_color[craydata$body_color == "orange_red"] <- "g"
-craydata$body_color[craydata$body_color == "blue_orange_red"] <- "g"
-craydata$body_color[craydata$body_color == "blue_purple"] <- "g"
-craydata$body_color[craydata$body_color == "unpigmented"] <- "c"
-
-
-craydata$species <- rownames(craydata)
-
-craydata <- craydata[ , c(19, 1:18)]
-
-unique(craydata$body_color)
-
-craydata$body_color <- as.factor(craydata$body_color)
-levels(craydata$body_color)
+craydata$color <- as.factor(craydata$color)
+levels(craydata$color)
 
 craydata$family[craydata$family == "Cambaridea"] <- "Cambaridae"
 craydata$family[craydata$family == "Parastacidea"] <- "Parastacidae"
@@ -667,6 +702,7 @@ craydata$family[craydata$family == "Cambaroididea"] <- "Cambaroididae"
 
 craydata$family <- as.factor(craydata$family)
 levels(craydata$family)
+
 
 ## Pruning the data and tree
 
@@ -677,11 +713,20 @@ pruned.tree <- drop.tip(craytree, chk$tree_not_data)
 pruned.data <- craydata[!(rownames(craydata) %in% chk$data_not_tree),, drop = FALSE]
 name.check(pruned.tree, pruned.data)
 
-bodycol <- setNames(as.factor(pruned.data$body_color), rownames(pruned.data))
-head(bodycol)
 
 
 ## Fan tree
+
+pruned.data$body_color[pruned.data$body_color == "no"] <- "c"
+pruned.data$body_color[pruned.data$body_color == "blue"] <- "b"
+pruned.data$body_color[pruned.data$body_color == "orange"] <- "o"
+pruned.data$body_color[pruned.data$body_color == "purple"] <- "p"
+pruned.data$body_color[pruned.data$body_color == "red"] <- "r"
+pruned.data$body_color[pruned.data$body_color == "blue_red"] <- "g"
+pruned.data$body_color[pruned.data$body_color == "orange_red"] <- "g"
+pruned.data$body_color[pruned.data$body_color == "blue_orange_red"] <- "g"
+pruned.data$body_color[pruned.data$body_color == "blue_purple"] <- "g"
+pruned.data$body_color[pruned.data$body_color == "unpigmented"] <- "c"
 
 b <- pruned.data$species[pruned.data$body_color == "b"]
 c <- pruned.data$species[pruned.data$body_color == "c"]
@@ -689,6 +734,11 @@ g <- pruned.data$species[pruned.data$body_color == "g"]
 o <- pruned.data$species[pruned.data$body_color == "o"]
 p <- pruned.data$species[pruned.data$body_color == "p"]
 r <- pruned.data$species[pruned.data$body_color == "r"]
+
+
+bodycol <- setNames(as.factor(pruned.data$body_color), rownames(pruned.data))
+head(bodycol)
+
 
 ft <- paintBranches(pruned.tree, edge = sapply(b, match, pruned.tree$tip.label),
     state = "b", anc.state = "c")
@@ -749,9 +799,8 @@ node3 <- getMRCA(ft, Astacidae)
 node4 <- getMRCA(ft, Cambaroididae)
 
 nodes <- c(node1, node2, node3, node4)
-nodes
 
-labels <- as.character(unique(pruned.data$family))
+labels <- c("Cambaridae", "Parastacida", "Astacidae", "Cambaroididae")
 
 for(i in 1:length(nodes)) 
     arc.cladelabels(text = labels[i], node = nodes[i], ln.offset = 1.05, lab.offset = 1.1, mark.node = FALSE, lwd = 3, 
@@ -797,11 +846,37 @@ for(i in 1:length(nodes))
 
 ## Adding different colors to polymorphic species
 
-craydata <- read.csv("col_data.csv", row.names = 1)
-poly <- craydata
+
+craydata.fam <- read.csv("col_data.csv", row.names = 1)
+craydata.fam$species <- rownames(craydata.fam)
+
+mlt <- melt(rel.tab, id.vars = c("species", "combined_burrow_category"), measure.vars = names(rel.tab[3:12]), direction = "long", value.name = "color", variable.name = "raterID")
+mlt <- mlt[1:nrow(rel.tab), ]
+rownames(mlt) <- mlt$species
+
+craydata <- merge(mlt, craydata.fam[c(1, 7, 19)], by = "species")
+rownames(craydata) <- craydata$species
+
 
 craytree <- read.tree("stern.2017.ml.new.tree")
-craytree
+
+unique(craydata$color)
+
+craydata$color <- as.factor(craydata$color)
+levels(craydata$color)
+
+craydata$family[craydata$family == "Cambaridea"] <- "Cambaridae"
+craydata$family[craydata$family == "Parastacidea"] <- "Parastacidae"
+craydata$family[craydata$family == "Astacidea"] <- "Astacidae"
+craydata$family[craydata$family == "Cambaroididea"] <- "Cambaroididae"
+
+craydata$family <- as.factor(craydata$family)
+levels(craydata$family)
+
+
+poly <- craydata
+
+
 
 ## Changing levels of the factors "body_color"
 
@@ -816,10 +891,6 @@ poly$body_color[poly$body_color == "blue_orange_red"] <- "b+o+r"
 poly$body_color[poly$body_color == "blue_purple"] <- "b+p"
 poly$body_color[poly$body_color == "unpigmented"] <- "c"
 
-
-poly$species <- rownames(poly)
-
-poly <- poly[ , c(19, 1:18)]
 
 unique(poly$body_color)
 
@@ -845,7 +916,7 @@ bp <- poly$species[poly$body_color == "b+p"]
 
 
 pies <- matrix(0, Ntip(poly.tree), 5,
-	 dimnames = list(pruned.tree$tip.label, c("b", "c", "o", "p", "r")))
+	 dimnames = list(poly.tree$tip.label, c("b", "c", "o", "p", "r")))
 
 pies[b, "b"] <- 1
 pies[c, "c"] <- 1
@@ -857,6 +928,9 @@ pies[o, "o"] <- 1
 pies[p, "p"] <- 1
 pies[r, "r"] <- 1
 
+```
+
+```{r, eval = FALSE}
 
 colsp <- setNames(c("skyblue", "black", "green4", "orange", "#6600CC", "red"), c("b", "c", "g", "o", "p", "r"))
 
@@ -1086,9 +1160,11 @@ par(fg = "black")
 ```
 
 
-```{r, include = FALSE}
+![](figure5.1.png)
 
-quartz()
+
+
+```{r, eval = FALSE, include = FALSE}
 
 png("figure5.1.png", height = 7, width = 7, units = "in", res = 300)
 
@@ -1183,8 +1259,6 @@ dev.off()
 
 
 
-quartz()
-
 pdf("figure5.1.pdf")
 
 
@@ -1278,9 +1352,6 @@ for(i in 1:length(nodes2)){
 dev.off()
 
 
-quartz()
-
-
 png("figure5.2.png", height = 7, width = 7, units = "in", res = 300)
 
 
@@ -1358,8 +1429,6 @@ par(fg = "black")
 
 dev.off()
 
-
-quartz()
 
 pdf("figure5.2.pdf")
 
@@ -1445,34 +1514,8 @@ dev.off()
 ```
 
 
-```{r, eval = FALSE, include = FALSE}
 
-
-## ggtree function
-
-pies[b, "b"] <- "b"
-pies[c, "c"] <- "c"
-pies[br, c("b", "r")] <- c("b", "r")
-pies[or, c("o", "r")] <- c("o", "r")
-pies[bor, c("b", "o", "r")] <- c("b", "o", "r")
-pies[bp, c("b", "p")] <- c("b", "p")
-pies[o, "o"] <- "o"
-pies[p, "p"] <- "p"
-pies[r, "r"] <- "r"
-pies[pies == "0"] <- "c"
-
-colors <- c("blue", "black", "orange", "purple", "red")
-
-gt <- ggtree(ft, layout = "circular", colour = "black")
-
-p1 <- gheatmap(gt, pies, offset = 0, width = .05,
-               colnames = FALSE, colnames_offset_y = 0, color = "black") + scale_fill_manual(values = colors, name = "body color", guide = guide_legend(keywidth = 0.5, keyheight = 0.5, order = 6, title = "body color"))
-
-
-```
-
-
-```{r, include = FALSE}
+```{r, include = FALSE, eval = FALSE}
 
 
 png("figure3.png", height = 7, width = 7, units = "in", res = 300)
@@ -1637,28 +1680,6 @@ for(i in 1:length(nodes))
                     orientation = if(labels[i] %in% c("Astacidae", "Cambaroididae"))
                                     "horizontal" else "curved")
 
-
-dev.off()
-
-
-```
-
-
-
-```{r, eval = FALSE, include = FALSE}
-
-
-quartz()
-
-png("figure6.png", height = 7, width = 7, units = "in", res = 300)
-
-print(p1)
-
-dev.off()
-
-pdf("figure6.pdf")
-
-print(p1)
 
 dev.off()
 
