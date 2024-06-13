@@ -204,7 +204,7 @@ cons <- pruned.data$species[pruned.data$color == "conspicuous"]
 tt <- paintBranches(pruned.tree, edge = sapply(cons, match, pruned.tree$tip.label),
     state = "conspicuous", anc.state = "cryptic")
 
-cols1 <- setNames(c("black", "orange"), c("cryptic", "conspicuous"))
+cols1 <- setNames(c("orange", "black"), c("conspicuous", "cryptic"))
 
 ## Body color tree
 
@@ -212,8 +212,7 @@ plot(tt, cols1, ftype = "off", lwd = 2, offset = 0.4)
 pp <- get("last_plot.phylo", envir = .PlotPhyloEnv)
 h <- max(nodeHeights(tt))
 
-points(pp$xx[1:Ntip(tt)] + 0.02*h, pp$yy[1:Ntip(tt)], pch = 16,
-    col = cols1[bodycol[tt$tip.label]], cex = 0.6)
+points(pp$xx[1:Ntip(tt)] + 0.02*h, pp$yy[1:Ntip(tt)], pch = 16, col = cols1[bodycol[tt$tip.label]], cex = 0.6)
 
 legend("topleft", legend = c("cryptic", "conspicuous"), pch = 21, pt.bg = cols1,
     pt.cex = 1.5, bty = "n", col = "transparent", cex = 1.5)
