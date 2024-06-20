@@ -214,7 +214,7 @@ h <- max(nodeHeights(tt))
 
 points(pp$xx[1:Ntip(tt)] + 0.02*h, pp$yy[1:Ntip(tt)], pch = 16, col = cols1[bodycol[tt$tip.label]], cex = 0.6)
 
-legend("topleft", legend = c("cryptic", "conspicuous"), pch = 21, pt.bg = cols1,
+legend("topleft", legend = c("conspicuous", "cryptic"), pch = 21, pt.bg = cols1,
     pt.cex = 1.5, bty = "n", col = "transparent", cex = 1.5)
 
 cryptic <- readPNG("imgs/cryptic.png")
@@ -281,7 +281,7 @@ h <- max(nodeHeights(tt))
 points(pp$xx[1:Ntip(tt)] + 0.02*h, pp$yy[1:Ntip(tt)], pch = 16,
     col = cols1[bodycol[tt$tip.label]], cex = 0.6)
 
-legend("topleft", legend = c("cryptic", "conspicuous"), pch = 21, pt.bg = cols1,
+legend("topleft", legend = c("conspicuous", "cryptic"), pch = 21, pt.bg = cols1,
     pt.cex = 1.5, bty = "n", col = "transparent", cex = 1.5)
 
 
@@ -493,7 +493,7 @@ node4 <- getMRCA(ft, Cambaroididae)
 
 nodes <- c(node1, node2, node3, node4)
 
-labels <- c("Cambaridae", "Parastacida", "Astacidae", "Cambaroididae")
+labels <- c("Cambaridae", "Parastacidae", "Astacidae", "Cambaroididae")
 
 for(i in 1:length(nodes)) 
     arc.cladelabels(text = labels[i], node = nodes[i], ln.offset = 1.05, lab.offset = 1.1, mark.node = FALSE, lwd = 3, orientation = if(labels[i] %in% c("Astacidae", "Cambaroididae")) "horizontal" else "curved")
@@ -842,5 +842,5 @@ par(fg = "black")
 ```
 
 
-![](imgs/figure5.1.png)
+![](imgs/figure1_correction.png)
 

@@ -9,9 +9,19 @@ output:
 
 <font size="5"> Data analysis workflow: </font>
 
+<br>
+
+<font size="4"> **Correlated evolution of conspicuous coloration and burrowing in crayfish** </font>
+
+
 </br>
 [Dylan Padilla](https://dylanpadilla.netlify.app/), School of Life Sciences, Arizona State University, Tempe, AZ 85287, USA.
 </br>
+
+
+![](imgs/asu_logo.png)
+
+<br>
 
 <b>
 <font size="4"> Library </font>
@@ -47,13 +57,6 @@ R.version
 sessionInfo()
 
 ```
-
-</br></br></br>
-
-
-<font size="4"> **Correlated evolution of conspicuous coloration and burrowing in crayfish** </font>
-
-</br></br>
 
 
 ```{r}
@@ -179,33 +182,6 @@ plot(interdependent.model, fit.signif = 4, cex.main = 1,
 ```
 
 
-```{r, include = FALSE, eval = FALSE}
-
-## Plotting model
-
-png("figure1.png", height = 7, width = 7, units = "in", res = 300)
-
-## pdf("figure1.pdf")
-
-plot(dependent.bodycol, fit.signif = 4, cex.main = 1,
-     cex.sub = 0.8, cex.traits = 0.7, width = TRUE, color = TRUE,
-     cex.rates = 0.7, lwd = 1, lwd.by.rate = TRUE, max.lwd = 4)
-
-dev.off()
-
-
-pdf("figure1.pdf")
-
-plot(dependent.bodycol, fit.signif = 4, cex.main = 1,
-     cex.sub = 0.8, cex.traits = 0.7, color = TRUE,
-     cex.rates = 0.7, lwd = 1, lwd.by.rate = TRUE, max.lwd = 4)
-
-dev.off()
-
-```
-
-
-
 ```{r}
 
 ## Trees facing to each other
@@ -228,7 +204,7 @@ cons <- pruned.data$species[pruned.data$color == "conspicuous"]
 tt <- paintBranches(pruned.tree, edge = sapply(cons, match, pruned.tree$tip.label),
     state = "conspicuous", anc.state = "cryptic")
 
-cols1 <- setNames(c("black", "orange"), c("cryptic", "conspicuous"))
+cols1 <- setNames(c("orange", "black"), c("conspicuous", "cryptic"))
 
 ## Body color tree
 
@@ -236,14 +212,13 @@ plot(tt, cols1, ftype = "off", lwd = 2, offset = 0.4)
 pp <- get("last_plot.phylo", envir = .PlotPhyloEnv)
 h <- max(nodeHeights(tt))
 
-points(pp$xx[1:Ntip(tt)] + 0.02*h, pp$yy[1:Ntip(tt)], pch = 16,
-    col = cols1[bodycol[tt$tip.label]], cex = 0.6)
+points(pp$xx[1:Ntip(tt)] + 0.02*h, pp$yy[1:Ntip(tt)], pch = 16, col = cols1[bodycol[tt$tip.label]], cex = 0.6)
 
 legend("topleft", legend = c("cryptic", "conspicuous"), pch = 21, pt.bg = cols1,
     pt.cex = 1.5, bty = "n", col = "transparent", cex = 1.5)
 
-cryptic <- readPNG("cryptic.png")
-conspicuous <- readPNG("conspicuous.png")
+cryptic <- readPNG("imgs/cryptic.png")
+conspicuous <- readPNG("imgs/conspicuous.png")
 
 rasterImage(cryptic, 65, 300, 170, 380)
 rasterImage(conspicuous, 60, 213, 168, 295)
@@ -273,174 +248,15 @@ points(pp$xx[1:Ntip(bt)] - 0.02*h, pp$yy[1:Ntip(bt)], pch = 16,
    col = cols2[burrowing[bt$tip.label]], cex = 0.6)
 
 
-legend("topright", legend = c("aquatic burrowing", "semi-terrestrial burrowing"), pch = 21, pt.bg = cols2,
-    pt.cex = 1.5, bty = "n", col = "transparent", cex = 1.5)
+legend("topright", legend = c("aquatic burrowing", "semi-terrestrial burrowing"), pch = 21, pt.bg = cols2, pt.cex = 1.5, bty = "n", col = "transparent", cex = 1.5)
 
 
-burrow <- readPNG("burrow3.png")
+burrow <- readPNG("imgs/burrow3.png")
 
 rasterImage(burrow, 70, 220, 260, 380)
 
 ```
 
-
-```{r, include = FALSE, eval = FALSE}
-
-
-## Trees facing to each other
-
-png("figure2.png", height = 7, width = 7, units = "in", res = 300)
-
-layout(matrix(c(1, 1, 2, 2,
-                1, 1, 3, 3,
-                1, 1, 3, 3,
-                1, 1, 2, 0,
-                1, 1, 2, 2), nrow = 5, ncol = 4, byrow = TRUE))
-
-
-c <- pruned.data$species[pruned.data$color == "cryptic"]
-cons <- pruned.data$species[pruned.data$color == "conspicuous"]
-
-## paint the edges
-
-tt <- paintBranches(pruned.tree, edge = sapply(cons, match, pruned.tree$tip.label),
-    state = "conspicuous", anc.state = "cryptic")
-
-cols1 <- setNames(c("black", "orange"), c("cryptic", "conspicuous"))
-
-## Body color tree
-
-plot(tt, cols1, ftype = "off", lwd = 2, offset = 0.4)
-pp <- get("last_plot.phylo", envir = .PlotPhyloEnv)
-h <- max(nodeHeights(tt))
-
-points(pp$xx[1:Ntip(tt)] + 0.02*h, pp$yy[1:Ntip(tt)], pch = 16,
-    col = cols1[bodycol[tt$tip.label]], cex = 0.6)
-
-legend("topleft", legend = c("cryptic", "conspicuous"), pch = 21, pt.bg = cols1,
-    pt.cex = 1.5, bty = "n", col = "transparent", cex = 1.5)
-
-cryptic <- readPNG("cryptic.png")
-conspicuous <- readPNG("conspicuous.png")
-
-rasterImage(cryptic, 65, 300, 170, 380)
-rasterImage(conspicuous, 60, 213, 168, 295)
-
-
-## Burrowing tree
-
-a <- pruned.data$species[pruned.data$combined_burrow_category == "aquatic"]
-t <- pruned.data$species[pruned.data$combined_burrow_category == "semi-terrestrial"]
-
-## paint the edges
-
-bt <- paintBranches(pruned.tree, edge = sapply(a, match, pruned.tree$tip.label),
-    state = "aquatic", anc.state = "semi-terrestrial")
-
-bt
-
-cols2 <- setNames(c("#2F5597", "#956D45"), c("aquatic", "semi-terrestrial"))
-
-## Burrowing tree
-
-plot(bt, cols2, ftype = "off", lwd = 2, offset = 0.4, direction = "leftwards")
-pp <- get("last_plot.phylo", envir = .PlotPhyloEnv)
-h <- max(nodeHeights(bt))
-
-points(pp$xx[1:Ntip(bt)] - 0.02*h, pp$yy[1:Ntip(bt)], pch = 16,
-   col = cols2[burrowing[bt$tip.label]], cex = 0.6)
-
-
-legend("topright", legend = c("aquatic burrowing", "semi-terrestrial burrowing"), pch = 21, pt.bg = cols2,
-    pt.cex = 1.5, bty = "n", col = "transparent", cex = 1.5)
-
-
-burrow <- readPNG("burrow3.png")
-
-rasterImage(burrow, 70, 220, 260, 380)
-
-
-
-dev.off()
-
-
-pdf("figure2.pdf")
-
-layout(matrix(c(1, 1, 2, 2,
-                1, 1, 3, 3,
-                1, 1, 3, 3,
-                1, 1, 2, 0,
-                1, 1, 2, 2), nrow = 5, ncol = 4, byrow = TRUE))
-
-
-c <- pruned.data$species[pruned.data$color == "cryptic"]
-cons <- pruned.data$species[pruned.data$color == "conspicuous"]
-
-## paint the edges
-
-tt <- paintBranches(pruned.tree, edge = sapply(cons, match, pruned.tree$tip.label),
-    state = "conspicuous", anc.state = "cryptic")
-
-cols1 <- setNames(c("black", "orange"), c("cryptic", "conspicuous"))
-
-## Body color tree
-
-plot(tt, cols1, ftype = "off", lwd = 2, offset = 0.4)
-pp <- get("last_plot.phylo", envir = .PlotPhyloEnv)
-h <- max(nodeHeights(tt))
-
-points(pp$xx[1:Ntip(tt)] + 0.02*h, pp$yy[1:Ntip(tt)], pch = 16,
-    col = cols1[bodycol[tt$tip.label]], cex = 0.6)
-
-legend("topleft", legend = c("cryptic", "conspicuous"), pch = 21, pt.bg = cols1,
-    pt.cex = 1.5, bty = "n", col = "transparent", cex = 1.5)
-
-cryptic <- readPNG("cryptic.png")
-conspicuous <- readPNG("conspicuous.png")
-
-rasterImage(cryptic, 65, 300, 170, 380)
-rasterImage(conspicuous, 60, 213, 168, 295)
-
-
-## Burrowing tree
-
-a <- pruned.data$species[pruned.data$combined_burrow_category == "aquatic"]
-t <- pruned.data$species[pruned.data$combined_burrow_category == "semi-terrestrial"]
-
-## paint the edges
-
-bt <- paintBranches(pruned.tree, edge = sapply(a, match, pruned.tree$tip.label),
-    state = "aquatic", anc.state = "semi-terrestrial")
-
-bt
-
-cols2 <- setNames(c("#2F5597", "#956D45"), c("aquatic", "semi-terrestrial"))
-
-## Burrowing tree
-
-plot(bt, cols2, ftype = "off", lwd = 2, offset = 0.4, direction = "leftwards")
-pp <- get("last_plot.phylo", envir = .PlotPhyloEnv)
-h <- max(nodeHeights(bt))
-
-points(pp$xx[1:Ntip(bt)] - 0.02*h, pp$yy[1:Ntip(bt)], pch = 16,
-   col = cols2[burrowing[bt$tip.label]], cex = 0.6)
-
-
-legend("topright", legend = c("aquatic burrowing", "semi-terrestrial burrowing"), pch = 21, pt.bg = cols2,
-    pt.cex = 1.5, bty = "n", col = "transparent", cex = 1.5)
-
-
-burrow <- readPNG("burrow3.png")
-
-rasterImage(burrow, 70, 220, 260, 380)
-
-
-
-dev.off()
-
-
-
-```
 
 
 ```{r}
@@ -479,8 +295,7 @@ points(pp$xx[1:Ntip(bt)] - 0.02*h, pp$yy[1:Ntip(bt)], pch = 16,
    col = cols2[burrowing[bt$tip.label]], cex = 0.6)
 
 
-legend("topright", legend = c("aquatic burrowing", "semi-terrestrial burrowing"), pch = 21, pt.bg = cols2,
-    pt.cex = 1.5, bty = "n", col = "transparent", cex = 1.5)
+legend("topright", legend = c("aquatic burrowing", "semi-terrestrial burrowing"), pch = 21, pt.bg = cols2, pt.cex = 1.5, bty = "n", col = "transparent", cex = 1.5)
 
 
 
@@ -547,127 +362,6 @@ legend("left", paste(round((table(pruned.data$body_color_zg[pruned.data$combined
 
 pie(table(pruned.data$body_color_zg[pruned.data$combined_burrow_category == "t"]), border = FALSE, main = paste("Semi-terrestrial burrowing \n n = ", length(pruned.data$body_color_zg[pruned.data$combined_burrow_category == "t"]), sep = ""),  col = colsf, labels = "", radius = 0.98, cex.main = 0.8)
 legend("left", paste(round((table(pruned.data$body_color_zg[pruned.data$combined_burrow_category == "t"])/length(pruned.data$body_color_zg[pruned.data$combined_burrow_category == "t"]))*100, 1), rep("%", length(unique(pruned.data$body_color_zg))), sep = ""), fill = colsf, bty = "n", cex = 0.8, border = FALSE)
-
-
-```
-
-
-```{r, include = FALSE, eval = FALSE}
-
-
-png("figure2.1.png", height = 7, width = 7, units = "in", res = 300)
-
-
-layout(matrix(c(1, 1, 1, 2, 2, 2,
-                3, 3, 1, 2, 4, 4,
-                3, 3, 1, 2, 4, 4,
-                3, 3, 1, 2, 5, 5,
-                3, 3, 1, 2, 5, 5,
-                0, 0, 1, 2, 0, 0,
-                1, 1, 1, 2, 2, 2,
-                1, 1, 1, 2, 2, 2), nrow = 8, ncol = 6, byrow = TRUE))
-
-
-## Body color tree
-
-plot(tt, cols1, ftype = "off", lwd = 2, offset = 0.4)
-pp <- get("last_plot.phylo", envir = .PlotPhyloEnv)
-h <- max(nodeHeights(tt))
-
-points(pp$xx[1:Ntip(tt)] + 0.02*h, pp$yy[1:Ntip(tt)], pch = 16,
-    col = cols1[bodycol[tt$tip.label]], cex = 0.6)
-
-legend("topleft", legend = c("cryptic", "conspicuous"), pch = 21, pt.bg = cols1,
-    pt.cex = 1.2, bty = "n", col = "transparent", cex = 1.5)
-
-
-## Burrowing tree
-
-plot(bt, cols2, ftype = "off", lwd = 2, offset = 0.4, direction = "leftwards")
-pp <- get("last_plot.phylo", envir = .PlotPhyloEnv)
-h <- max(nodeHeights(bt))
-
-points(pp$xx[1:Ntip(bt)] - 0.02*h, pp$yy[1:Ntip(bt)], pch = 16,
-   col = cols2[burrowing[bt$tip.label]], cex = 0.6)
-
-
-legend("topright", legend = c("aquatic burrowing", "semi-terrestrial burrowing"), pch = 21, pt.bg = cols2,
-    pt.cex = 1.5, bty = "n", col = "transparent", cex = 1.5)
-
-
-colsf <- setNames(c("#2F5597", "#956D45"), c("b", "c"))
-
-par(mar = c(5, 2, 2, 0))
-pie(table(pruned.data$color), border = FALSE, col = colsf, labels = "", radius = 0.5)
-text(0, 0.8, paste("Combined \n n = ", length(pruned.data$color), sep = ""), font = 2)
-legend("left", paste(round((table(pruned.data$color)/length(pruned.data$color)*100), 1), rep("%", length(unique(pruned.data$color)), sep = "")), fill = colsf, bty = "n", cex = 0.8, border = FALSE)
-
-par(mar = c(4, 2, 1.3, 0))
-pie(table(pruned.data$color[pruned.data$combined_burrow_category == "a"]), border = FALSE, labels = "", main = paste("Aquatic burrowing \n n = ", length(pruned.data$color[pruned.data$combined_burrow_category == "a"]), sep = ""), col = colsf, radius = 0.98, cex.main = 0.8)
-legend("left", paste(round((table(pruned.data$color[pruned.data$combined_burrow_category == "a"])/length(pruned.data$color[pruned.data$combined_burrow_category == "a"]))*100, 1), rep("%", length(unique(pruned.data$color))), sep = ""), fill = colsf, bty = "n", cex = 0.8, border = FALSE)
-
-pie(table(pruned.data$color[pruned.data$combined_burrow_category == "t"]), border = FALSE, main = paste("Semi-terrestrial burrowing \n n = ", length(pruned.data$color[pruned.data$combined_burrow_category == "t"]), sep = ""),  col = colsf, labels = "", radius = 0.98, cex.main = 0.8)
-legend("left", paste(round((table(pruned.data$color[pruned.data$combined_burrow_category == "t"])/length(pruned.data$color[pruned.data$combined_burrow_category == "t"]))*100, 1), rep("%", length(unique(pruned.data$color))), sep = ""), fill = colsf, bty = "n", cex = 0.8, border = FALSE)
-
-
-dev.off()
-
-
-pdf("figure2.1.pdf")
-
-
-layout(matrix(c(1, 1, 1, 2, 2, 2,
-                3, 3, 1, 2, 4, 4,
-                3, 3, 1, 2, 4, 4,
-                3, 3, 1, 2, 5, 5,
-                3, 3, 1, 2, 5, 5,
-                0, 0, 1, 2, 0, 0,
-                1, 1, 1, 2, 2, 2,
-                1, 1, 1, 2, 2, 2), nrow = 8, ncol = 6, byrow = TRUE))
-
-## Body color tree
-
-plot(tt, cols1, ftype = "off", lwd = 2, offset = 0.4)
-pp <- get("last_plot.phylo", envir = .PlotPhyloEnv)
-h <- max(nodeHeights(tt))
-
-points(pp$xx[1:Ntip(tt)] + 0.02*h, pp$yy[1:Ntip(tt)], pch = 16,
-    col = cols1[bodycol[tt$tip.label]], cex = 0.6)
-
-legend("topleft", legend = c("cryptic", "conspicuous"), pch = 21, pt.bg = cols1,
-    pt.cex = 1.2, bty = "n", col = "transparent", cex = 1.5)
-
-
-## Burrowing tree
-
-plot(bt, cols2, ftype = "off", lwd = 2, offset = 0.4, direction = "leftwards")
-pp <- get("last_plot.phylo", envir = .PlotPhyloEnv)
-h <- max(nodeHeights(bt))
-
-points(pp$xx[1:Ntip(bt)] - 0.02*h, pp$yy[1:Ntip(bt)], pch = 16,
-   col = cols2[burrowing[bt$tip.label]], cex = 0.6)
-
-
-legend("topright", legend = c("aquatic burrowing", "semi-terrestrial burrowing"), pch = 21, pt.bg = cols2,
-    pt.cex = 1.5, bty = "n", col = "transparent", cex = 1.5)
-
-
-colsf <- setNames(c("#2F5597", "#956D45"), c("b", "c"))
-
-par(mar = c(5, 2, 2, 0))
-pie(table(pruned.data$color), border = FALSE, col = colsf, labels = "", radius = 0.5)
-text(0, 0.8, paste("Combined \n n = ", length(pruned.data$color), sep = ""), font = 2)
-legend("left", paste(round((table(pruned.data$color)/length(pruned.data$color)*100), 1), rep("%", length(unique(pruned.data$color)), sep = "")), fill = colsf, bty = "n", cex = 0.8, border = FALSE)
-
-par(mar = c(4, 2, 1.3, 0))
-pie(table(pruned.data$color[pruned.data$combined_burrow_category == "a"]), border = FALSE, labels = "", main = paste("Aquatic burrowing \n n = ", length(pruned.data$color[pruned.data$combined_burrow_category == "a"]), sep = ""), col = colsf, radius = 0.98, cex.main = 0.8)
-legend("left", paste(round((table(pruned.data$color[pruned.data$combined_burrow_category == "a"])/length(pruned.data$color[pruned.data$combined_burrow_category == "a"]))*100, 1), rep("%", length(unique(pruned.data$color))), sep = ""), fill = colsf, bty = "n", cex = 0.8, border = FALSE)
-
-pie(table(pruned.data$color[pruned.data$combined_burrow_category == "t"]), border = FALSE, main = paste("Semi-terrestrial burrowing \n n = ", length(pruned.data$color[pruned.data$combined_burrow_category == "t"]), sep = ""),  col = colsf, labels = "", radius = 0.98, cex.main = 0.8)
-legend("left", paste(round((table(pruned.data$color[pruned.data$combined_burrow_category == "t"])/length(pruned.data$color[pruned.data$combined_burrow_category == "t"]))*100, 1), rep("%", length(unique(pruned.data$color))), sep = ""), fill = colsf, bty = "n", cex = 0.8, border = FALSE)
-
-
-dev.off()
 
 
 ```
@@ -782,8 +476,7 @@ points(pp$xx[1:Ntip(ft)], pp$yy[1:Ntip(ft)], pch = 16,
 text(scale, rep(-23, length(scale)), h - scale, cex = 0.6)
 text(mean(scale), -38, "time (mya)", cex = 0.7)
 
-legend("bottomleft", legend = c("blue", "cryptic", "polymorphic", "orange", "purple", "red"), pch = 21, pt.bg = colsf,
-    pt.cex = 0.9, bty = "n", col = "transparent", cex = 0.8)
+legend("bottomleft", legend = c("blue", "cryptic", "polymorphic", "orange", "purple", "red"), pch = 21, pt.bg = colsf, pt.cex = 0.9, bty = "n", col = "transparent", cex = 0.8)
 
 unique(pruned.data$family)
 
@@ -803,9 +496,7 @@ nodes <- c(node1, node2, node3, node4)
 labels <- c("Cambaridae", "Parastacida", "Astacidae", "Cambaroididae")
 
 for(i in 1:length(nodes)) 
-    arc.cladelabels(text = labels[i], node = nodes[i], ln.offset = 1.05, lab.offset = 1.1, mark.node = FALSE, lwd = 3, 
-                    orientation = if(labels[i] %in% c("Astacidae", "Cambaroididae"))
-                                    "horizontal" else "curved")
+    arc.cladelabels(text = labels[i], node = nodes[i], ln.offset = 1.05, lab.offset = 1.1, mark.node = FALSE, lwd = 3, orientation = if(labels[i] %in% c("Astacidae", "Cambaroididae")) "horizontal" else "curved")
 
 
 colsf2 <- setNames(c("skyblue", "black", "green4", "orange", "#6600CC", "red"), c("b", "c", "g", "o", "p", "r"))
@@ -834,13 +525,10 @@ points(pp$xx[1:Ntip(ft)], pp$yy[1:Ntip(ft)], pch = 16,
 text(scale, rep(-23, length(scale)), h - scale, cex = 0.6)
 text(mean(scale), -38, "time (mya)", cex = 0.7)
 
-legend("bottomleft", legend = c("blue", "cryptic", "polymorphic", "orange", "purple", "red"), pch = 21, pt.bg = colsf,
-    pt.cex = 0.9, bty = "n", col = "transparent", cex = 0.8)
+legend("bottomleft", legend = c("blue", "cryptic", "polymorphic", "orange", "purple", "red"), pch = 21, pt.bg = colsf, pt.cex = 0.9, bty = "n", col = "transparent", cex = 0.8)
 
 for(i in 1:length(nodes)) 
-    arc.cladelabels(text = labels[i], node = nodes[i], ln.offset = 1.05, lab.offset = 1.1, mark.node = FALSE, lwd = 3, 
-                    orientation = if(labels[i] %in% c("Astacidae", "Cambaroididae"))
-                                    "horizontal" else "curved")
+    arc.cladelabels(text = labels[i], node = nodes[i], ln.offset = 1.05, lab.offset = 1.1, mark.node = FALSE, lwd = 3, orientation = if(labels[i] %in% c("Astacidae", "Cambaroididae")) "horizontal" else "curved")
 
 
 
@@ -955,20 +643,18 @@ for(i in 1:length(scale)){
 
 
 par(fg = "transparent")
+
 colspie <- setNames(c("skyblue", "black", "orange", "#6600CC", "red"), c("b", "c", "o", "p", "r"))
 
 tiplabels(pie = pies, piecol = colspie, cex = 0.22)
 
 par(fg = "black")
-legend("bottomleft", legend = c("blue", "cryptic", "orange", "purple", "red"), pch = 21, pt.bg = colspie,
-    pt.cex = 0.9, bty = "n", col = "transparent", cex = 0.8)
+
+legend("bottomleft", legend = c("blue", "cryptic", "orange", "purple", "red"), pch = 21, pt.bg = colspie, pt.cex = 0.9, bty = "n", col = "transparent", cex = 0.8)
 
 
 for(i in 1:length(nodes)) 
-    arc.cladelabels(text = labels[i], node = nodes[i], ln.offset = 1.05, lab.offset = 1.1, mark.node = FALSE,
-                    lwd = 3, 
-                    orientation = if(labels[i] %in% c("Astacidae", "Cambaroididae"))
-                                    "horizontal" else "curved")
+    arc.cladelabels(text = labels[i], node = nodes[i], ln.offset = 1.05, lab.offset = 1.1, mark.node = FALSE, lwd = 3, orientation = if(labels[i] %in% c("Astacidae", "Cambaroididae")) "horizontal" else "curved")
 
 
 
@@ -1019,8 +705,7 @@ points(385, 30, bg = "red", pch = 21, cex = 3)
 text(385, 30, "H")
 
 
-legend("topleft", legend = c("blue", "cryptic", "orange", "purple", "red"), pch = 21, pt.bg = colspie,
-    pt.cex = 0.7, bty = "n", col = "transparent", cex = 0.7)
+legend("topleft", legend = c("blue", "cryptic", "orange", "purple", "red"), pch = 21, pt.bg = colspie, pt.cex = 0.7, bty = "n", col = "transparent", cex = 0.7)
 
 par(new = TRUE)
 
@@ -1031,12 +716,9 @@ plot(ft, "white", type = "fan", ftype = "off", mar = c(10, 4, 1, 4), part = 0.96
 par(fg = "black")
 
 for(i in 1:length(nodes)) 
-    arc.cladelabels(text = labels[i], node = nodes[i], ln.offset = 1.065, lab.offset = 1.1, mark.node = FALSE,
-                    lwd = 1.5, col = "black", cex = 0.7, orientation = if(labels[i] %in% c("Astacidae", "Cambaroididae"))
-                                                 "horizontal" else "curved")
+    arc.cladelabels(text = labels[i], node = nodes[i], ln.offset = 1.065, lab.offset = 1.1, mark.node = FALSE, lwd = 1.5, col = "black", cex = 0.7, orientation = if(labels[i] %in% c("Astacidae", "Cambaroididae")) "horizontal" else "curved")
 
-nodelabels(LETTERS[1:length(nodes2)], node = nodes2, frame = "circle", bg = c("red", "orange", "skyblue", "skyblue", "purple",
-                                                                              "orange", "#956D45", "red"), cex = 1)
+nodelabels(LETTERS[1:length(nodes2)], node = nodes2, frame = "circle", bg = c("red", "orange", "skyblue", "skyblue", "purple", "orange", "#956D45", "red"), cex = 1)
 
 par(new = TRUE)
 
@@ -1074,7 +756,8 @@ plot(ft, "white", type = "fan", ftype = "off", mar = c(11.8, 5.8, 2.8, 5.8), par
 par(fg = "black")
 
 for(i in 1:length(nodes2)){
-    xy <- add.arrow(ft, nodes2[i], col = "blue", arrl = 20, lwd = 1.5, hedl = 5, offset = 2)
+    xy <- add.arrow(ft, nodes2[i], col = "blue", arrl = 20, lwd = 1.5,
+                    hedl = 5, offset = 2)
 }
 
 
@@ -1122,8 +805,7 @@ plot(ft, "white", type = "fan", ftype = "off", mar = c(10, 4, 1, 4), part = 0.96
 par(fg = "black")
 
 
-nodelabels(LETTERS[1:length(nodes2)], node = nodes2, frame = "circle", bg = c("red", "orange", "skyblue", "skyblue", "purple",
-                                                                              "orange", "#956D45", "red"), cex = 1)
+nodelabels(LETTERS[1:length(nodes2)], node = nodes2, frame = "circle", bg = c("red", "orange", "skyblue", "skyblue", "purple", "orange", "#956D45", "red"), cex = 1)
 
 obj <- get("last_plot.phylo", envir = .PlotPhyloEnv)
 
@@ -1160,528 +842,5 @@ par(fg = "black")
 ```
 
 
-![](figure5.1.png)
+![](imgs/figure5.1.png)
 
-
-
-```{r, eval = FALSE, include = FALSE}
-
-png("figure5.1.png", height = 7, width = 7, units = "in", res = 300)
-
-plot(ft, plot = FALSE)
-rasterImage(Australasiensis, -25, 40, 120, 100)
-rasterImage(Engaeus, 120, 40, 245, 100)
-rasterImage(Dubius, 245, 40, 370, 100)
-rasterImage(Cambarus, 370, 40, 495, 100)
-rasterImage(Cherax, -25, -18, 120, 40)
-rasterImage(Distocambarus, 120, -18, 245, 40)
-rasterImage(Faxonius, 245, -18, 370, 40)
-rasterImage(Procambarus, 370, -18, 495, 40)
-
-points(-6, 90, bg = "red", pch = 21, cex = 3)
-text(-6, 90, "A")
-points(135, 90, bg = "orange", pch = 21, cex = 3)
-text(135, 90, "B")
-points(260, 90, bg = "skyblue", pch = 21, cex = 3)
-text(260, 90, "C")
-points(385, 90, bg = "skyblue", pch = 21, cex = 3)
-text(385, 90, "D")
-points(-6, 30, bg = "purple", pch = 21, cex = 3)
-text(-6, 30, "E")
-points(135, 30, bg = "orange", pch = 21, cex = 3)
-text(135, 30, "F")
-points(260, 30, bg = "#956D45", pch = 21, cex = 3)
-text(260, 30, "G")
-points(385, 30, bg = "red", pch = 21, cex = 3)
-text(385, 30, "H")
-
-
-legend("topleft", legend = c("blue", "cryptic", "orange", "purple", "red"), pch = 21, pt.bg = colspie,
-    pt.cex = 0.7, bty = "n", col = "transparent", cex = 0.7)
-
-par(new = TRUE)
-
-par(fg = "transparent")
-
-plot(ft, "white", type = "fan", ftype = "off", mar = c(10, 4, 1, 4), part = 0.96)
-
-par(fg = "black")
-
-for(i in 1:length(nodes)) 
-    arc.cladelabels(text = labels[i], node = nodes[i], ln.offset = 1.065, lab.offset = 1.1, mark.node = FALSE,
-                    lwd = 1.5, col = "black", cex = 0.7, orientation = if(labels[i] %in% c("Astacidae", "Cambaroididae"))
-                                                 "horizontal" else "curved")
-
-nodelabels(LETTERS[1:length(nodes2)], node = nodes2, frame = "circle", bg = c("red", "orange", "skyblue", "skyblue", "purple",
-                                                                              "orange", "#956D45", "red"), cex = 1)
-
-par(new = TRUE)
-
-plot(ft, colsp, type = "fan", ftype = "off", mar = c(12, 6, 3, 6), part = 0.96)
-
-h <- max(nodeHeights(ft))
-tick.spacing <- 20
-min.tick <- 0
-scale <- axis(1, pos = -5, at = seq(h, min.tick, by = -tick.spacing), cex.axis = 0.5, labels = FALSE)
-pp <- get("last_plot.phylo", envir = .PlotPhyloEnv)
-
-text(scale, rep(-28, length(scale)), h - scale, cex = 0.5, srt = 20)
-text(mean(scale), -48, "time (mya)", cex = 0.5)
-
-for(i in 1:length(scale)){
-    a1 <- 0
-    a2 <- 2*pi
-    draw.arc(0, 0, radius = scale[i], a1, a2, lwd = 1,
-        col = make.transparent("blue", 0.15))
-}
-
-
-par(fg = "transparent")
-
-colspie <- setNames(c("skyblue", "black", "orange", "#6600CC", "red"), c("b", "c", "o", "p", "r"))
-
-tiplabels(pie = pies, piecol = colspie, cex = 0.2)
-
-par(new = TRUE)
-
-par(fg = "transparent")
-
-plot(ft, "white", type = "fan", ftype = "off", mar = c(11.8, 5.8, 2.8, 5.8), part = 0.96)
-
-par(fg = "black")
-
-for(i in 1:length(nodes2)){
-    xy <- add.arrow(ft, nodes2[i], col = "blue", arrl = 20, lwd = 1.5, hedl = 5, offset = 2)
-}
-
-
-dev.off()
-
-
-
-pdf("figure5.1.pdf")
-
-
-plot(ft, plot = FALSE)
-rasterImage(Australasiensis, -25, 40, 120, 100)
-rasterImage(Engaeus, 120, 40, 245, 100)
-rasterImage(Dubius, 245, 40, 370, 100)
-rasterImage(Cambarus, 370, 40, 495, 100)
-rasterImage(Cherax, -25, -18, 120, 40)
-rasterImage(Distocambarus, 120, -18, 245, 40)
-rasterImage(Faxonius, 245, -18, 370, 40)
-rasterImage(Procambarus, 370, -18, 495, 40)
-
-points(-6, 90, bg = "red", pch = 21, cex = 3)
-text(-6, 90, "A")
-points(135, 90, bg = "orange", pch = 21, cex = 3)
-text(135, 90, "B")
-points(260, 90, bg = "skyblue", pch = 21, cex = 3)
-text(260, 90, "C")
-points(385, 90, bg = "skyblue", pch = 21, cex = 3)
-text(385, 90, "D")
-points(-6, 30, bg = "purple", pch = 21, cex = 3)
-text(-6, 30, "E")
-points(135, 30, bg = "orange", pch = 21, cex = 3)
-text(135, 30, "F")
-points(260, 30, bg = "#956D45", pch = 21, cex = 3)
-text(260, 30, "G")
-points(385, 30, bg = "red", pch = 21, cex = 3)
-text(385, 30, "H")
-
-
-legend("topleft", legend = c("blue", "cryptic", "orange", "purple", "red"), pch = 21, pt.bg = colspie,
-    pt.cex = 0.7, bty = "n", col = "transparent", cex = 0.7)
-
-par(new = TRUE)
-
-par(fg = "transparent")
-
-plot(ft, "white", type = "fan", ftype = "off", mar = c(10, 4, 1, 4), part = 0.96)
-
-par(fg = "black")
-
-for(i in 1:length(nodes)) 
-    arc.cladelabels(text = labels[i], node = nodes[i], ln.offset = 1.065, lab.offset = 1.1, mark.node = FALSE,
-                    lwd = 1.5, col = "black", cex = 0.7, orientation = if(labels[i] %in% c("Astacidae", "Cambaroididae"))
-                                                 "horizontal" else "curved")
-
-nodelabels(LETTERS[1:length(nodes2)], node = nodes2, frame = "circle", bg = c("red", "orange", "skyblue", "skyblue", "purple",
-                                                                              "orange", "#956D45", "red"), cex = 1)
-
-par(new = TRUE)
-
-plot(ft, colsp, type = "fan", ftype = "off", mar = c(12, 6, 3, 6), part = 0.96)
-
-h <- max(nodeHeights(ft))
-tick.spacing <- 20
-min.tick <- 0
-scale <- axis(1, pos = -5, at = seq(h, min.tick, by = -tick.spacing), cex.axis = 0.5, labels = FALSE)
-pp <- get("last_plot.phylo", envir = .PlotPhyloEnv)
-
-text(scale, rep(-28, length(scale)), h - scale, cex = 0.5, srt = 20)
-text(mean(scale), -48, "time (mya)", cex = 0.5)
-
-for(i in 1:length(scale)){
-    a1 <- 0
-    a2 <- 2*pi
-    draw.arc(0, 0, radius = scale[i], a1, a2, lwd = 1,
-        col = make.transparent("blue", 0.15))
-}
-
-
-par(fg = "transparent")
-
-colspie <- setNames(c("skyblue", "black", "orange", "#6600CC", "red"), c("b", "c", "o", "p", "r"))
-
-tiplabels(pie = pies, piecol = colspie, cex = 0.2)
-
-par(new = TRUE)
-
-par(fg = "transparent")
-
-plot(ft, "white", type = "fan", ftype = "off", mar = c(11.8, 5.8, 2.8, 5.8), part = 0.96)
-
-par(fg = "black")
-
-for(i in 1:length(nodes2)){
-    xy <- add.arrow(ft, nodes2[i], col = "blue", arrl = 20, lwd = 1.5, hedl = 5, offset = 2)
-}
-
-
-dev.off()
-
-
-png("figure5.2.png", height = 7, width = 7, units = "in", res = 300)
-
-
-plot(ft, plot = FALSE)
-rasterImage(Australasiensis, -25, 40, 120, 100)
-rasterImage(Engaeus, 120, 40, 245, 100)
-rasterImage(Dubius, 245, 40, 370, 100)
-rasterImage(Cambarus, 370, 40, 495, 100)
-rasterImage(Cherax, -25, -18, 120, 40)
-rasterImage(Distocambarus, 120, -18, 245, 40)
-rasterImage(Faxonius, 245, -18, 370, 40)
-rasterImage(Procambarus, 370, -18, 495, 40)
-
-points(-6, 90, bg = "red", pch = 21, cex = 3)
-text(-6, 90, "A")
-points(135, 90, bg = "orange", pch = 21, cex = 3)
-text(135, 90, "B")
-points(260, 90, bg = "skyblue", pch = 21, cex = 3)
-text(260, 90, "C")
-points(385, 90, bg = "skyblue", pch = 21, cex = 3)
-text(385, 90, "D")
-points(-6, 30, bg = "purple", pch = 21, cex = 3)
-text(-6, 30, "E")
-points(135, 30, bg = "orange", pch = 21, cex = 3)
-text(135, 30, "F")
-points(260, 30, bg = "#956D45", pch = 21, cex = 3)
-text(260, 30, "G")
-points(385, 30, bg = "red", pch = 21, cex = 3)
-text(385, 30, "H")
-
-
-legend("topleft", legend = c("blue", "cryptic", "orange", "purple", "red"), pch = 21, pt.bg = colspie,
-    pt.cex = 0.7, bty = "n", col = "transparent", cex = 0.7)
-
-par(new = TRUE)
-
-par(fg = "transparent")
-
-plot(ft, "white", type = "fan", ftype = "off", mar = c(10, 4, 1, 4), part = 0.96)
-
-par(fg = "black")
-
-
-nodelabels(LETTERS[1:length(nodes2)], node = nodes2, frame = "circle", bg = c("red", "orange", "skyblue", "skyblue", "purple",
-                                                                              "orange", "#956D45", "red"), cex = 1)
-
-par(new = TRUE)
-
-plot(ft, colsp, type = "fan", ftype = "off", mar = c(11, 5, 2, 5), part = 0.96)
-
-h <- max(nodeHeights(ft))
-tick.spacing <- 20
-min.tick <- 0
-scale <- axis(1, pos = -5, at = seq(h, min.tick, by = -tick.spacing), cex.axis = 0.5, labels = FALSE)
-pp <- get("last_plot.phylo", envir = .PlotPhyloEnv)
-
-text(scale, rep(-28, length(scale)), h - scale, cex = 0.5)
-text(mean(scale), -48, "time (mya)", cex = 0.5)
-
-for(i in 1:length(scale)){
-    a1 <- 0
-    a2 <- 2*pi
-    draw.arc(0, 0, radius = scale[i], a1, a2, lwd = 1,
-        col = make.transparent("blue", 0.15))
-}
-
-
-par(fg = "transparent")
-
-colspie <- setNames(c("skyblue", "black", "orange", "#6600CC", "red"), c("b", "c", "o", "p", "r"))
-
-tiplabels(pie = pies, piecol = colspie, cex = 0.2)
-
-par(fg = "black")
-
-dev.off()
-
-
-pdf("figure5.2.pdf")
-
-
-plot(ft, plot = FALSE)
-rasterImage(Australasiensis, -25, 40, 120, 100)
-rasterImage(Engaeus, 120, 40, 245, 100)
-rasterImage(Dubius, 245, 40, 370, 100)
-rasterImage(Cambarus, 370, 40, 495, 100)
-rasterImage(Cherax, -25, -18, 120, 40)
-rasterImage(Distocambarus, 120, -18, 245, 40)
-rasterImage(Faxonius, 245, -18, 370, 40)
-rasterImage(Procambarus, 370, -18, 495, 40)
-
-points(-6, 90, bg = "red", pch = 21, cex = 3)
-text(-6, 90, "A")
-points(135, 90, bg = "orange", pch = 21, cex = 3)
-text(135, 90, "B")
-points(260, 90, bg = "skyblue", pch = 21, cex = 3)
-text(260, 90, "C")
-points(385, 90, bg = "skyblue", pch = 21, cex = 3)
-text(385, 90, "D")
-points(-6, 30, bg = "purple", pch = 21, cex = 3)
-text(-6, 30, "E")
-points(135, 30, bg = "orange", pch = 21, cex = 3)
-text(135, 30, "F")
-points(260, 30, bg = "#956D45", pch = 21, cex = 3)
-text(260, 30, "G")
-points(385, 30, bg = "red", pch = 21, cex = 3)
-text(385, 30, "H")
-
-
-legend("topleft", legend = c("blue", "cryptic", "orange", "purple", "red"), pch = 21, pt.bg = colspie,
-    pt.cex = 0.7, bty = "n", col = "transparent", cex = 0.7)
-
-par(new = TRUE)
-
-par(fg = "transparent")
-
-plot(ft, "white", type = "fan", ftype = "off", mar = c(10, 4, 1, 4), part = 0.96)
-
-par(fg = "black")
-
-
-nodelabels(LETTERS[1:length(nodes2)], node = nodes2, frame = "circle", bg = c("red", "orange", "skyblue", "skyblue", "purple",
-                                                                              "orange", "#956D45", "red"), cex = 1)
-
-
-par(new = TRUE)
-
-plot(ft, colsp, type = "fan", ftype = "off", mar = c(11, 5, 2, 5), part = 0.96)
-
-h <- max(nodeHeights(ft))
-tick.spacing <- 20
-min.tick <- 0
-scale <- axis(1, pos = -5, at = seq(h, min.tick, by = -tick.spacing), cex.axis = 0.5, labels = FALSE)
-pp <- get("last_plot.phylo", envir = .PlotPhyloEnv)
-
-text(scale, rep(-28, length(scale)), h - scale, cex = 0.5)
-text(mean(scale), -48, "time (mya)", cex = 0.5)
-
-for(i in 1:length(scale)){
-    a1 <- 0
-    a2 <- 2*pi
-    draw.arc(0, 0, radius = scale[i], a1, a2, lwd = 1,
-        col = make.transparent("blue", 0.15))
-}
-
-
-par(fg = "transparent")
-
-colspie <- setNames(c("skyblue", "black", "orange", "#6600CC", "red"), c("b", "c", "o", "p", "r"))
-
-tiplabels(pie = pies, piecol = colspie, cex = 0.2)
-
-par(fg = "black")
-
-dev.off()
-
-
-
-
-```
-
-
-
-```{r, include = FALSE, eval = FALSE}
-
-
-png("figure3.png", height = 7, width = 7, units = "in", res = 300)
-
-colsf <- setNames(c("skyblue", "#956D45", "green4", "orange", "#6600CC", "red"), c("b", "c", "g", "o", "p", "r"))
-
-plot(ft, colsf, type = "fan", ftype = "off", lwd = 2,
-     mar = c(2.5, 2, 2, 1), part = 0.98)
-
-h <- max(nodeHeights(ft))
-tick.spacing <- 20
-min.tick <- 0
-scale <- axis(1, pos = -5, at = seq(h, min.tick, by = -tick.spacing), cex.axis = 0.5, labels = FALSE)
-pp <- get("last_plot.phylo", envir = .PlotPhyloEnv)
-
-for(i in 1:length(scale)){
-    a1 <- 0
-    a2 <- 2*pi
-    draw.arc(0, 0, radius = scale[i], a1, a2, lwd = 1,
-        col = make.transparent("blue", 0.15))
-}
-
-points(pp$xx[1:Ntip(ft)], pp$yy[1:Ntip(ft)], pch = 16,
-   col = colsf[bodycol[ft$tip.label]], cex = 0.7)
-
-text(scale, rep(-23, length(scale)), h - scale, cex = 0.6)
-text(mean(scale), -38, "time (mya)", cex = 0.7)
-
-
-for(i in 1:length(nodes)) 
-    arc.cladelabels(text = labels[i], node = nodes[i], ln.offset = 1.05, lab.offset = 1.1, mark.node = FALSE,
-                    lwd = 3, 
-                    orientation = if(labels[i] %in% c("Astacidae", "Cambaroididae"))
-                                    "horizontal" else "curved")
-
-legend("bottomleft", legend = c("blue", "cryptic", "polymorphic", "orange", "purple", "red"), pch = 21, pt.bg = colsf,
-    pt.cex = 0.9, bty = "n", col = "transparent", cex = 0.8)
-
-
-
-dev.off()
-
-
-
-pdf("figure3.pdf")
-
-
-colsf <- setNames(c("skyblue", "#956D45", "green4", "orange", "#6600CC", "red"), c("b", "c", "g", "o", "p", "r"))
-
-
-plot(ft, colsf, type = "fan", ftype = "off", lwd = 2,
-     mar = c(2.5, 2, 2, 1), part = 0.98)
-
-h <- max(nodeHeights(ft))
-tick.spacing <- 20
-min.tick <- 0
-scale <- axis(1, pos = -5, at = seq(h, min.tick, by = -tick.spacing), cex.axis = 0.5, labels = FALSE)
-pp <- get("last_plot.phylo", envir = .PlotPhyloEnv)
-
-for(i in 1:length(scale)){
-    a1 <- 0
-    a2 <- 2*pi
-    draw.arc(0, 0, radius = scale[i], a1, a2, lwd = 1,
-        col = make.transparent("blue", 0.15))
-}
-
-points(pp$xx[1:Ntip(ft)], pp$yy[1:Ntip(ft)], pch = 16,
-   col = colsf[bodycol[ft$tip.label]], cex = 0.7)
-
-text(scale, rep(-23, length(scale)), h - scale, cex = 0.6)
-text(mean(scale), -38, "time (mya)", cex = 0.7)
-
-
-legend("bottomleft", legend = c("blue", "cryptic", "polymorphic", "orange", "purple", "red"), pch = 21, pt.bg = colsf,
-    pt.cex = 0.9, bty = "n", col = "transparent", cex = 0.8)
-
-
-for(i in 1:length(nodes)) 
-    arc.cladelabels(text = labels[i], node = nodes[i], ln.offset = 1.05, lab.offset = 1.1, mark.node = FALSE,
-                    lwd = 3, 
-                    orientation = if(labels[i] %in% c("Astacidae", "Cambaroididae"))
-                                    "horizontal" else "curved")
-
-
-dev.off()
-
-
-png("figure4.png", height = 7, width = 7, units = "in", res = 300)
-
-colsf2 <- setNames(c("skyblue", "black", "green4", "orange", "#6600CC", "red"), c("b", "c", "g", "o", "p", "r"))
-
-
-plot(ft, colsf2, type = "fan", ftype = "off", lwd = 2,
-     mar = c(2.5, 2, 2, 1), part = 0.98)
-
-h <- max(nodeHeights(ft))
-tick.spacing <- 20
-min.tick <- 0
-scale <- axis(1, pos = -5, at = seq(h, min.tick, by = -tick.spacing), cex.axis = 0.5, labels = FALSE)
-pp <- get("last_plot.phylo", envir = .PlotPhyloEnv)
-
-for(i in 1:length(scale)){
-    a1 <- 0
-    a2 <- 2*pi
-    draw.arc(0, 0, radius = scale[i], a1, a2, lwd = 1,
-        col = make.transparent("blue", 0.15))
-}
-
-points(pp$xx[1:Ntip(ft)], pp$yy[1:Ntip(ft)], pch = 16,
-   col = colsf2[bodycol[ft$tip.label]], cex = 0.7)
-
-text(scale, rep(-23, length(scale)), h - scale, cex = 0.6)
-text(mean(scale), -38, "time (mya)", cex = 0.7)
-
-
-legend("bottomleft", legend = c("blue", "cryptic", "polymorphic", "orange", "purple", "red"), pch = 21, pt.bg = colsf,
-    pt.cex = 0.9, bty = "n", col = "transparent", cex = 0.8)
-
-for(i in 1:length(nodes)) 
-    arc.cladelabels(text = labels[i], node = nodes[i], ln.offset = 1.05, lab.offset = 1.1, mark.node = FALSE,
-                    lwd = 3, 
-                    orientation = if(labels[i] %in% c("Astacidae", "Cambaroididae"))
-                                    "horizontal" else "curved")
-
-
-dev.off()
-
-
-pdf("figure4.pdf")
-
-colsf2 <- setNames(c("skyblue", "black", "green4", "orange", "#6600CC", "red"), c("b", "c", "g", "o", "p", "r"))
-
-
-plot(ft, colsf2, type = "fan", ftype = "off", lwd = 2,
-     mar = c(2.5, 2, 2, 1), part = 0.98)
-
-h <- max(nodeHeights(ft))
-tick.spacing <- 20
-min.tick <- 0
-scale <- axis(1, pos = -5, at = seq(h, min.tick, by = -tick.spacing), cex.axis = 0.5, labels = FALSE)
-pp <- get("last_plot.phylo", envir = .PlotPhyloEnv)
-
-for(i in 1:length(scale)){
-    a1 <- 0
-    a2 <- 2*pi
-    draw.arc(0, 0, radius = scale[i], a1, a2, lwd = 1,
-        col = make.transparent("blue", 0.15))
-}
-
-points(pp$xx[1:Ntip(ft)], pp$yy[1:Ntip(ft)], pch = 16,
-   col = colsf2[bodycol[ft$tip.label]], cex = 0.7)
-
-text(scale, rep(-23, length(scale)), h - scale, cex = 0.6)
-text(mean(scale), -38, "time (mya)", cex = 0.7)
-
-legend("bottomleft", legend = c("blue", "cryptic", "polymorphic", "orange", "purple", "red"), pch = 21, pt.bg = colsf,
-       pt.cex = 0.9, bty = "n", col = "transparent", cex = 0.8)
-
-for(i in 1:length(nodes)) 
-    arc.cladelabels(text = labels[i], node = nodes[i], ln.offset = 1.05, lab.offset = 1.1, mark.node = FALSE,
-                    lwd = 3, 
-                    orientation = if(labels[i] %in% c("Astacidae", "Cambaroididae"))
-                                    "horizontal" else "curved")
-
-
-dev.off()
-
-
-```
